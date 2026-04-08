@@ -5,11 +5,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Any, Dict
 import json
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
-import asyncio
 from datetime import datetime
 import logging
+
+# MCP optional - will work without it!
+try:
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+    MCP_AVAILABLE = True
+    print("✅ MCP available")
+except ImportError:
+    MCP_AVAILABLE = False
+    print("⚠️ MCP not installed, using mock SQL generator")
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
