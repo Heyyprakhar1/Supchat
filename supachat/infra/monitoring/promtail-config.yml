@@ -23,9 +23,8 @@ scrape_configs:
             output: log
             stream: stream
             attrs: attrs
-            tag: attrs.tag
       - regex:
-          source: tag
+          source: attrs.tag
           expression: (?P<container_name>(?:[^|]*[^|])).+
       - timestamp:
           source: time
@@ -35,4 +34,12 @@ scrape_configs:
           container_name:
       - output:
           source: output
+
+  - job_name: syslog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
 
