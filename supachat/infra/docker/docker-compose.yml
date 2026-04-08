@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: supachat-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=supachat
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_DB=supachat_test
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../../infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - supachat-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supachat -d supachat_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: supachat-api
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://supachat:password123@db:5432/supachat_test
+      - MCP_SERVER_COMMAND=npx
+      - MCP_SERVER_ARGS=-y @modelcontextprotocol/server-postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - supachat-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.web
+    container_name: supachat-web
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - supachat-network
+
+  # Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: supachat-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+      - api
+    networks:
+      - supachat-network
+
+networks:
+  supachat-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+
