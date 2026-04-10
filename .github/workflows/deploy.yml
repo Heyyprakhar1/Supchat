@@ -68,7 +68,7 @@ jobs:
           image-ref: docker.io/${{ secrets.DOCKER_USERNAME }}/supchat-web:${{ github.sha }}
           format: table
           exit-code: '1'
-          ignorefile: .trivyignore
+          trivyignores: .trivyignore
           severity: CRITICAL,HIGH
 
       # ── Push Images ────────────────────────────────────────────────
