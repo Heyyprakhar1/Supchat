@@ -1,6 +1,6 @@
 # SupChat — Conversational Analytics
 
-[![CI/CD](https://github.com/Heyyprakhar1/Supchat/actions/workflows/deploy.yml/badge.svg)](https://github.com/Heyyprakhar1/Supchat/actions/workflows/deploy.yml)
+[![CI/CD](https://github.com/Heyyprakhar1/Supchat-analytics/actions/workflows/deploy.yml/badge.svg)](https://github.com/Heyyprakhar1/Supchat-analytics/actions/workflows/deploy.yml)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://hub.docker.com/u/heyyprakhar1)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
@@ -131,8 +131,8 @@ DockerHub images:
 
 ```bash
 # 1. Clone
-git clone https://github.com/Heyyprakhar1/Supchat.git
-cd Supchat/supachat
+git clone https://github.com/Heyyprakhar1/Supchat-analytics.git
+cd Supchat-analytics/supachat
 
 # 2. Copy env
 cp .env.example .env
@@ -176,6 +176,7 @@ npm run dev
 | `DOCKER_PASSWORD` | DockerHub password or access token |
 | `EC2_HOST` | EC2 public IP |
 | `EC2_SSH_KEY` | Full private key contents |
+| `EC2_USER`     | `ubuntu` (default for Ubuntu EC2 AMIs) |
 
 Once secrets are set, every push to `main` deploys automatically.
 
@@ -189,8 +190,8 @@ sudo apt update && sudo apt install -y docker.io docker-compose-plugin
 sudo usermod -aG docker ubuntu && newgrp docker
 
 # clone and run
-git clone https://github.com/Heyyprakhar1/Supchat.git
-cd Supchat/supachat/infra/docker
+git clone https://github.com/Heyyprakhar1/Supchat-analytics.git
+cd Supchat-analytics/supachat/infra/docker
 docker compose up -d
 ```
 
@@ -200,7 +201,7 @@ docker compose up -d
 
 ```bash
 # Database
-DATABASE_URL=postgresql://supachat:password123@db:5432/supachat_test
+DATABASE_URL=postgresql://supachat:YOUR_DB_PASSWORD@db:5432/supachat_db
 
 # MCP
 MCP_SERVER_COMMAND=npx
@@ -211,7 +212,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 # Monitoring
 GF_SECURITY_ADMIN_USER=admin
-GF_SECURITY_ADMIN_PASSWORD=changeme
+GF_SECURITY_ADMIN_PASSWORD=YOUR_GRAFANA_PASSWORD
 
 # DevOps Agent (optional)
 OPENAI_API_KEY=sk-...
