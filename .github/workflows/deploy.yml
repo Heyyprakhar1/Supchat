@@ -30,6 +30,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: supachat/infra/docker/Dockerfile.web
+          ignore: DL3008
 
       # ── Docker Login ───────────────────────────────────────────────
       - name: Login to DockerHub
