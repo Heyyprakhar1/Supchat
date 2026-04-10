@@ -61,7 +61,6 @@ jobs:
           format: table
           exit-code: '1'
           severity: CRITICAL,HIGH
-          exit-code: '1'
           ignore-unfixed: true
 
       - name: Scan Web Image
@@ -70,7 +69,7 @@ jobs:
           image-ref: docker.io/${{ secrets.DOCKER_USERNAME }}/supchat-web:${{ github.sha }}
           format: table
           exit-code: '1'
-          trivyignores: .trivyignore
+          trivyignore: .trivyignore
           severity: CRITICAL,HIGH
 
       # ── Push Images ────────────────────────────────────────────────
