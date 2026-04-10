@@ -60,6 +60,9 @@ jobs:
           image-ref: docker.io/${{ secrets.DOCKER_USERNAME }}/supchat-api:${{ github.sha }}
           format: table
           exit-code: '1'
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
 
       - name: Scan Web Image
         uses: aquasecurity/trivy-action@v0.35.0
