@@ -1,73 +1,124 @@
-# SupChat — Conversational Analytics
+# 🗨️ SupChat — Conversational Analytics
+
+<div align="center">
 
 [![CI/CD](https://github.com/Heyyprakhar1/Supchat-analytics/actions/workflows/deploy.yml/badge.svg)](https://github.com/Heyyprakhar1/Supchat-analytics/actions/workflows/deploy.yml)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://hub.docker.com/u/heyyprakhar1)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![AWS EC2](https://img.shields.io/badge/AWS_EC2-FF9900?style=flat&logo=amazonaws&logoColor=white)](https://aws.amazon.com/ec2/)
+[![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white)](https://grafana.com/)
 
-Ask questions in plain English. Get SQL, tables, and charts back.
+**Ask questions in plain English. Get SQL, tables, and charts back — instantly.**
 
-SupaChat sits on top of a PostgreSQL blog analytics database and converts natural language queries into SQL using a local Ollama LLM (no API key needed). Results come back as chatbot responses, data tables, or Recharts visualizations depending on what the question asks for.
+*No API key needed. Runs fully local with Ollama (tinyllama).*
+
+</div>
+
+---
+
+## ✨ What is SupChat?
+
+SupChat sits on top of a PostgreSQL blog analytics database and converts **natural language → SQL → visualizations** using a local LLM. Just type what you want to know, and SupChat figures out the query, runs it, and returns the best visual format automatically.
 
 ```
-"Show top trending topics in last 30 days"   →  bar chart
-"Plot daily views trend for AI articles"      →  line chart
-"Compare article engagement by topic"         →  table + chart
+💬 "Show top trending topics in last 30 days"   →  📊 bar chart
+💬 "Plot daily views trend for AI articles"      →  📈 line chart  
+💬 "Compare article engagement by topic"         →  📋 table + chart
 ```
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 Browser
    │
    ▼
 Nginx (port 80)
-   ├── /        → Next.js frontend (port 3000)
-   └── /api/    → FastAPI backend  (port 8000)
+   ├── /        → Next.js frontend  (port 3000)
+   └── /api/    → FastAPI backend   (port 8000)
                         │
-                        ├── Ollama (tinyllama, port 11434)
-                        └── PostgreSQL (port 5432)
+                        ├── Ollama tinyllama  (port 11434)
+                        └── PostgreSQL 15     (port 5432)
 
-Monitoring
-   ├── Prometheus  :9090
-   ├── Grafana     :3001
-   ├── Loki        :3100
-   ├── cAdvisor    :9323
-   └── Node Exporter :9100
+Monitoring Stack
+   ├── Prometheus    :9090   ← metrics scraping
+   ├── Grafana       :3001   ← dashboards
+   ├── Loki          :3100   ← log aggregation
+   ├── Promtail              ← log shipping
+   ├── cAdvisor      :9323   ← container metrics
+   └── Node Exporter :9100   ← host metrics
 ```
 
-| Layer | Tech |
+### Tech Stack
+
+| Layer | Technology |
 |---|---|
-| Frontend | Next.js 14, React, Recharts, TailwindCSS |
-| Backend | FastAPI, asyncpg, Ollama (tinyllama) |
-| Database | PostgreSQL 15 |
-| Infra | Docker, Docker Compose, Nginx |
-| Cloud | AWS EC2 |
-| CI/CD | GitHub Actions |
-| Monitoring | Prometheus, Grafana, Loki, Promtail, cAdvisor |
-| Security | Gitleaks, Hadolint, Trivy |
-| IaC | Terraform |
+| **Frontend** | Next.js 14, React, Recharts, TailwindCSS |
+| **Backend** | FastAPI, asyncpg, Ollama (tinyllama) |
+| **Database** | PostgreSQL 15 |
+| **Infra** | Docker, Docker Compose, Nginx |
+| **Cloud** | AWS EC2 |
+| **CI/CD** | GitHub Actions |
+| **Monitoring** | Prometheus, Grafana, Loki, Promtail, cAdvisor |
+| **Security** | Gitleaks, Hadolint, Trivy |
+| **IaC** | Terraform |
 
 ---
 
-## Repo Structure
+## 🔁 CI/CD Pipeline
+
+Every push to `main` triggers the full pipeline automatically:
 
 ```
-Supchat/
+git push → main
+      │
+      ▼
+  Gitleaks              ← 🔐 secret scanning
+      │
+      ▼
+  Hadolint (×2)         ← 🐳 Dockerfile linting (api + web)
+      │
+      ▼
+  Docker Build (×2)     ← 🔨 tagged :latest + :<git-sha>
+      │
+      ▼
+  Trivy Scan (×2)       ← 🛡️ CVE scanning CRITICAL/HIGH
+      │
+      ▼
+  Push → DockerHub      ← 📦 heyyprakhar1/supchat-api & web
+      │
+      ▼
+  SSH → EC2             ← 🚀 git reset --hard + compose up
+```
+
+> Pipeline config: `.github/workflows/deploy.yml`
+
+DockerHub images:
+- [`heyyprakhar1/supchat-api:latest`](https://hub.docker.com/r/heyyprakhar1/supchat-api)
+- [`heyyprakhar1/supchat-web:latest`](https://hub.docker.com/r/heyyprakhar1/supchat-web)
+
+---
+
+## 📁 Repo Structure
+
+```
+supchat-analytics/
 └── supachat/
     ├── apps/
-    │   ├── api/               # FastAPI backend
+    │   ├── api/                    # FastAPI backend
     │   │   ├── main.py
     │   │   └── requirements.txt
-    │   ├── web/               # Next.js frontend
+    │   ├── web/                    # Next.js frontend
     │   │   ├── app/
     │   │   │   ├── page.tsx
     │   │   │   └── layout.tsx
     │   │   ├── next.config.js
     │   │   └── package.json
-    │   └── agent/             # DevOps agent (bonus)
+    │   └── agent/                  # DevOps agent
     │       └── devops_agent.py
     ├── infra/
     │   ├── docker/
@@ -91,62 +142,30 @@ Supchat/
 
 ---
 
-## CI/CD Pipeline
-
-Every push to `main` triggers this pipeline automatically:
-
-```
-Push to main
-     │
-     ▼
-Gitleaks          ← secret scanning across the full codebase
-     │
-     ▼
-Hadolint (x2)     ← Dockerfile linting for api + web
-     │
-     ▼
-Docker build      ← builds api + web images tagged :latest + :<git-sha>
-     │
-     ▼
-Trivy scan (x2)   ← CVE scanning on both built images
-     │
-     ▼
-Push to DockerHub ← heyyprakhar1/supchat-api, heyyprakhar1/supchat-web
-     │
-     ▼
-SSH → EC2         ← docker compose pull + up -d --remove-orphans
-```
-
-Pipeline: `.github/workflows/deploy.yml`
-
-DockerHub images:
-- `heyyprakhar1/supchat-api:latest`
-- `heyyprakhar1/supchat-web:latest`
-
----
-
-## Local Development
+## 🚀 Quick Start (Local)
 
 **Prerequisites:** Docker, Docker Compose v2, Git
 
 ```bash
-# 1. Clone
+# 1. Clone the repo
 git clone https://github.com/Heyyprakhar1/Supchat-analytics.git
 cd Supchat-analytics/supachat
 
-# 2. Copy env
+# 2. Set up environment
 cp .env.example .env
-# edit DATABASE_URL to point to your PostgreSQL instance
+# Edit DATABASE_URL and other variables as needed
 
-# 3. Start everything
+# 3. Start all services
 docker compose -f infra/docker/docker-compose.yml up --build
 
-# 4. Open http://localhost
+# 4. Open the app
+# App:     http://localhost
+# Swagger: http://localhost:8000/docs
+# Grafana: http://localhost:3001
 ```
 
-API docs (Swagger) at `http://localhost:8000/docs`.
-
-**Backend only:**
+<details>
+<summary><b>Run backend only</b></summary>
 
 ```bash
 cd apps/api
@@ -154,8 +173,10 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
+</details>
 
-**Frontend only:**
+<details>
+<summary><b>Run frontend only</b></summary>
 
 ```bash
 cd apps/web
@@ -163,69 +184,44 @@ npm install
 npm run dev
 # http://localhost:3000
 ```
+</details>
 
 ---
 
-## EC2 Deployment
+## ☁️ EC2 Deployment
 
-**GitHub Secrets needed:**
+### 1. Set GitHub Secrets
 
-| Secret | Value |
+| Secret | Description |
 |---|---|
-| `DOCKER_USERNAME` | `heyyprakhar1` |
+| `DOCKER_USERNAME` | Your DockerHub username |
 | `DOCKER_PASSWORD` | DockerHub password or access token |
-| `EC2_HOST` | EC2 public IP |
-| `EC2_SSH_KEY` | Full private key contents |
-| `EC2_USER`     | `ubuntu` (default for Ubuntu EC2 AMIs) |
+| `EC2_HOST` | EC2 public IP address |
+| `EC2_SSH_KEY` | Full private key contents (PEM) |
 
-Once secrets are set, every push to `main` deploys automatically.
-
-**Manual first-time setup on EC2:**
+### 2. First-time EC2 Setup
 
 ```bash
 ssh -i your-key.pem ubuntu@<EC2-IP>
 
-# install Docker
+# Install Docker
 sudo apt update && sudo apt install -y docker.io docker-compose-plugin
 sudo usermod -aG docker ubuntu && newgrp docker
 
-# clone and run
+# Clone and start
 git clone https://github.com/Heyyprakhar1/Supchat-analytics.git
 cd Supchat-analytics/supachat/infra/docker
 docker compose up -d
 ```
 
----
-
-## Environment Variables
-
-```bash
-# Database
-DATABASE_URL=postgresql://supachat:YOUR_DB_PASSWORD@db:5432/supachat_db
-
-# MCP
-MCP_SERVER_COMMAND=npx
-MCP_SERVER_ARGS=-y @modelcontextprotocol/server-postgres
-
-# Frontend
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Monitoring
-GF_SECURITY_ADMIN_USER=admin
-GF_SECURITY_ADMIN_PASSWORD=YOUR_GRAFANA_PASSWORD
-
-# DevOps Agent (optional)
-OPENAI_API_KEY=sk-...
-```
-
-Never commit `.env`. Use GitHub Secrets for CI/CD.
+After this, every push to `main` deploys automatically. ✅
 
 ---
 
-## API Reference
+## 🔌 API Reference
 
-**Health check**
-```
+### Health Check
+```http
 GET /api/health
 ```
 ```json
@@ -236,13 +232,15 @@ GET /api/health
 }
 ```
 
-**Natural language query**
-```
+### Natural Language Query
+```http
 POST /api/query
 Content-Type: application/json
-
+```
+```json
 { "question": "Show top trending topics in last 30 days" }
 ```
+**Response:**
 ```json
 {
   "sql": "SELECT topic, SUM(views) as total_views FROM articles WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY topic ORDER BY total_views DESC LIMIT 10",
@@ -258,33 +256,20 @@ Content-Type: application/json
 
 ---
 
-## Monitoring
+## 📊 Monitoring
 
-| Service | URL | Login |
+| Service | URL | Access |
 |---|---|---|
-| App | `http://<EC2-IP>` | public |
-| Grafana | `http://<EC2-IP>:3001` | admin / from .env |
-| Prometheus | `http://<EC2-IP>:9090` | public |
-| Health | `http://<EC2-IP>/api/health` | public |
+| App | `http://<EC2-IP>` | Public |
+| Grafana | `http://<EC2-IP>:3001` | admin / `.env` |
+| Prometheus | `http://<EC2-IP>:9090` | Public |
+| Health API | `http://<EC2-IP>/api/health` | Public |
 
-Prometheus scrapes FastAPI metrics, cAdvisor container stats, and node-exporter host metrics. Logs flow from containers → Promtail → Loki → Grafana.
-
----
-
-## Nginx
-
-`infra/nginx/nginx.conf` handles:
-
-- `/` → Next.js (port 3000)
-- `/api/` → FastAPI (port 8000)
-- gzip compression
-- WebSocket support via `Upgrade` headers
-- Rate limiting — 50 req/s frontend, 10 req/s API
-- Security headers (X-Frame-Options, X-Content-Type-Options, XSS)
+Prometheus scrapes FastAPI metrics, cAdvisor container stats, and node-exporter host metrics. Logs flow: `containers → Promtail → Loki → Grafana`.
 
 ---
 
-## Database Schema
+## 🗄️ Database Schema
 
 ```sql
 CREATE TABLE articles (
@@ -298,27 +283,40 @@ CREATE TABLE articles (
 );
 ```
 
-Full schema + sample data in `infra/db/init.sql`.
+Full schema + seed data in `infra/db/init.sql`.
 
 ---
 
-## DevOps Agent (Bonus)
+## 🌐 Nginx
 
-`apps/agent/devops_agent.py` — a small FastAPI service with three endpoints:
+`infra/nginx/nginx.conf` handles routing and hardening:
+
+- `/` → Next.js (port 3000)
+- `/api/` → FastAPI (port 8000)
+- Gzip compression
+- WebSocket support (`Upgrade` headers)
+- Rate limiting — 50 req/s frontend, 10 req/s API
+- Security headers — `X-Frame-Options`, `X-Content-Type-Options`, XSS protection
+
+---
+
+## 🤖 DevOps Agent *(Bonus)*
+
+`apps/agent/devops_agent.py` — an autonomous ops agent with three endpoints:
 
 | Endpoint | What it does |
 |---|---|
 | `POST /agent/deploy` | Restarts or updates containers remotely |
-| `POST /agent/analyze-logs` | GPT-4 log analysis with root cause + fix suggestion |
-| `POST /agent/health-check` | Runs docker ps, df, free, curl health — returns overall status |
+| `POST /agent/analyze-logs` | GPT-4 log analysis — root cause + fix suggestion |
+| `POST /agent/health-check` | Runs `docker ps`, `df`, `free`, `curl health` — returns overall status |
 
-Requires `OPENAI_API_KEY` only for log analysis. The other two endpoints work without it.
+> `OPENAI_API_KEY` required only for log analysis. Other endpoints work without it.
 
 ---
 
-## Terraform
+## 🏗️ Terraform
 
-Provisions EC2, VPC, security groups, and key pair.
+Provisions EC2, VPC, security groups, and key pair on AWS.
 
 ```bash
 cd supachat/terraform
@@ -329,40 +327,97 @@ terraform apply
 
 ---
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-**Containers not starting**
+<details>
+<summary><b>Containers not starting</b></summary>
+
 ```bash
 docker compose logs -f api
 docker compose logs -f web
 ```
+</details>
 
-**Database connection refused**
-- Check `DATABASE_URL` has correct host/port
-- Verify db container is healthy: `docker compose ps`
+<details>
+<summary><b>Database connection refused</b></summary>
 
-**Frontend can't reach API**
+- Verify `DATABASE_URL` has the correct host/port
+- Check db container is healthy: `docker compose ps`
+</details>
+
+<details>
+<summary><b>Frontend can't reach API</b></summary>
+
 ```bash
 docker exec -it supachat-web wget -qO- http://api:8000/api/health
 ```
+</details>
 
-**Ollama slow on first query**
-- Normal — first query loads the model (~30-60s)
-- Falls back to hardcoded SQL patterns automatically if Ollama is unavailable
+<details>
+<summary><b>EC2 not reflecting latest changes after push</b></summary>
+
+```bash
+cd /opt/Supchat/supachat
+git fetch origin
+git reset --hard origin/main
+git clean -fd
+cd infra/docker
+docker compose pull
+docker compose up -d --remove-orphans
+```
+</details>
+
+<details>
+<summary><b>Ollama slow on first query</b></summary>
+
+Normal behaviour — first query loads the model (~30–60s). Falls back to hardcoded SQL patterns automatically if Ollama is unavailable.
+</details>
 
 ---
 
-## AI Tools Used
+## 🛠️ Environment Variables
+
+```bash
+# Database
+DATABASE_URL=postgresql://supachat:YOUR_PASSWORD@db:5432/supachat_db
+
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# Monitoring
+GF_SECURITY_ADMIN_USER=admin
+GF_SECURITY_ADMIN_PASSWORD=YOUR_GRAFANA_PASSWORD
+
+# DevOps Agent (optional)
+OPENAI_API_KEY=sk-...
+```
+
+> ⚠️ Never commit `.env` to git. Use GitHub Secrets for CI/CD.
+
+---
+
+## 🤝 AI Tools Used
 
 | Tool | Used for |
 |---|---|
-| Claude | Architecture, CI/CD pipeline, Dockerfile fixes, debugging |
+| Claude | Architecture design, CI/CD pipeline, Dockerfile fixes, debugging |
 | Cursor | Code generation and refactoring |
 | GitHub Copilot | Boilerplate completion |
 
 ---
 
-## Author
+## 👤 Author
 
 **Prakhar Srivastava**
-[LinkedIn](https://linkedin.com/in/heyyprakhar1) · [GitHub](https://github.com/Heyyprakhar1) · srivprak0106@gmail.com
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://linkedin.com/in/heyyprakhar1)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=flat&logo=github&logoColor=white)](https://github.com/Heyyprakhar1)
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat&logo=gmail&logoColor=white)](mailto:srivprak0106@gmail.com)
+
+---
+
+<div align="center">
+
+⭐ **If this project helped you, consider giving it a star!** ⭐
+
+</div>
