@@ -1,4 +1,4 @@
-# SupaChat — Conversational Analytics
+# SupChat — Conversational Analytics
 
 [![CI/CD](https://github.com/Heyyprakhar1/Supchat/actions/workflows/deploy.yml/badge.svg)](https://github.com/Heyyprakhar1/Supchat/actions/workflows/deploy.yml)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://hub.docker.com/u/heyyprakhar1)
