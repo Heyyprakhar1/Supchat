@@ -1,22 +1,19 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'SupaChat - Conversational Analytics',
-  description: 'Natural language analytics powered by AI',
-}
+  title: 'SupaChat — Conversational Analytics',
+  description: 'Ask questions in plain English. Get SQL, tables, and charts back.',
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="font-mono antialiased">{children}</body>
     </html>
-  )
+  );
 }
